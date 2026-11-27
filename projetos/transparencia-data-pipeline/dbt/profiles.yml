@@ -1,0 +1,18 @@
+transparencia:
+  target: dev
+  outputs:
+    dev: &bq
+      type: bigquery
+      method: service-account
+      keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS') }}"
+      project: "{{ env_var('GCP_PROJECT') }}"
+      dataset: transparencia_dev
+      location: "{{ env_var('BQ_LOCATION', 'US') }}"
+      threads: 4
+      maximum_bytes_billed: 5000000000   # trava de custo: 5 GB por query
+    prod:
+      <<: *bq
+      dataset: transparencia
+    ci:
+      <<: *bq
+      dataset: transparencia_ci

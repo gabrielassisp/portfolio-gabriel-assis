@@ -1,0 +1,18 @@
+{
+  "checked_on": "2026-11-22",
+  "lakehouse_tests": {
+    "passed": 38,
+    "duration_seconds": 11.44,
+    "source": "nova execução local de pytest"
+  },
+  "replay": {
+    "revenue_cents": 25000,
+    "active_sales": 3,
+    "silver_rows": 4,
+    "exit_code": 0
+  },
+  "limits": [
+    "Não foi executado novo Job cloud nesta coleta.",
+    "Resultados cloud de 15/11/2026 permanecem registros históricos documentados."
+  ]
+}

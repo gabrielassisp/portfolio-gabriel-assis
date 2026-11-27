@@ -1,0 +1,10 @@
+version: 2
+sources:
+  - name: bronze
+    description: Tabelas externas sobre o Parquet da bronze no GCS (criadas pelo Terraform).
+    schema: bronze
+    tables:
+      - name: bolsa_familia_municipio
+        description: Novo Bolsa Família por município, um arquivo por mês. payload = JSON bruto.
+      - name: despesas_por_orgao
+        description: Despesas por órgão, um arquivo por ano. payload = JSON bruto.

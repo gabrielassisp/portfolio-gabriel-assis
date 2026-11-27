@@ -1,0 +1,15 @@
+version: 2
+models:
+  - name: dim_municipio
+    description: Dimensão de municípios.
+    columns:
+      - name: cod_municipio_ibge
+        tests: [unique, not_null]
+  - name: fct_bolsa_familia_mensal
+    description: Fato mensal do Novo Bolsa Família. Grão = município x mês.
+    columns:
+      - name: cod_municipio_ibge
+        tests:
+          - relationships:
+              to: ref('dim_municipio')
+              field: cod_municipio_ibge

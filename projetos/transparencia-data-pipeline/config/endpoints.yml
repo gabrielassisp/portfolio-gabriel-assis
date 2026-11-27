@@ -1,0 +1,14 @@
+# Endpoints ingeridos. Confira nomes e parâmetros no Swagger:
+# https://api.portaldatransparencia.gov.br/swagger-ui/index.html
+# "restrito: true" usa o limite de 180 req/min.
+endpoints:
+  despesas_por_orgao:
+    path: /despesas/por-orgao
+    restrito: false
+    particao: ano          # um arquivo por ano
+    params_fixos: {}
+  bolsa_familia_municipio:
+    path: /novo-bolsa-familia-por-municipio
+    restrito: true
+    particao: mes_ano      # um arquivo por mês (param mesAno=YYYYMM)
+    params_fixos: {}

@@ -1,0 +1,8 @@
+# Arquivos que o dag-processor do Airflow não deve tentar parsear como DAG
+ingestion/
+tests/
+dbt/
+infra/
+config/
+credentials/
+data/

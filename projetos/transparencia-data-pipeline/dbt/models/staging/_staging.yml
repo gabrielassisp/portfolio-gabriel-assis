@@ -1,0 +1,19 @@
+version: 2
+models:
+  - name: stg_bolsa_familia_municipio
+    description: Bolsa Família por município e mês, tipado a partir da bronze.
+    columns:
+      - name: cod_municipio_ibge
+        description: Código IBGE do município (7 dígitos).
+        tests: [not_null]
+      - name: mes_referencia
+        description: Primeiro dia do mês de referência.
+        tests: [not_null]
+      - name: valor_total
+        description: Valor total pago no município no mês (R$).
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [cod_municipio_ibge, mes_referencia]

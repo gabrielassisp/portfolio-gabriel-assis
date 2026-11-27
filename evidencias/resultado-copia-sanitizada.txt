@@ -1,0 +1,5 @@
+Validação da cópia sanitizada para divulgação
+38 testes aprovados em 9,61s.
+Importação do módulo vendas conferida na cópia revisada.
+Duas execuções da demo concluídas: receita final 25000 centavos, 3 vendas ativas, 4 linhas Silver.
+Nenhuma nova execução cloud ou mudança de visibilidade realizada.

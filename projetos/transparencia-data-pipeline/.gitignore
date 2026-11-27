@@ -1,0 +1,15 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+data/
+logs/
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+.terraform/
+*.tfstate*
+*.tfvars
+!*.tfvars.example
+credentials*.json
+credentials/*.json
