@@ -10,6 +10,7 @@ from pathlib import Path
 import yaml
 
 from ingestion.client import TransparenciaClient
+from ingestion.municipios import listar_municipios
 from ingestion.storage import Storage, caminho_particao, para_tabela
 
 CONFIG = Path(__file__).resolve().parent.parent / "config" / "endpoints.yml"
@@ -33,8 +34,13 @@ def params_da_particao(tipo: str, ano: int, mes: int | None) -> tuple[dict, dict
     raise ValueError(f"Tipo de partição desconhecido: {tipo}")
 
 
+def ufs_configuradas(cfg: dict) -> list[str]:
+    env = os.environ.get("BF_UFS", "")
+    return [u for u in env.split(",") if u.strip()] or cfg.get("ufs", [])
+
+
 def extrair(dominio: str, ano: int, mes: int | None = None, client=None, storage=None,
-            params_extra: dict | None = None) -> dict:
+            params_extra: dict | None = None, municipios: list[str] | None = None) -> dict:
     cfg = carregar_config(dominio)
     client = client or TransparenciaClient(os.environ.get("TRANSPARENCIA_API_KEY", ""),
                                            restrito=cfg.get("restrito", False))
@@ -44,14 +50,22 @@ def extrair(dominio: str, ano: int, mes: int | None = None, client=None, storage
     params, particao = params_da_particao(cfg["particao"], ano, mes)
     params = {**cfg.get("params_fixos", {}), **params, **(params_extra or {})}
 
+    if cfg.get("iterar_por") == "codigoIbge":
+        codigos = municipios if municipios is not None else listar_municipios(ufs_configuradas(cfg))
+        requisicoes = [{**params, "codigoIbge": c} for c in codigos]
+    else:
+        requisicoes = [params]
+
     inicio, registros, paginas = time.monotonic(), [], 0
-    for pagina in client.paginar(cfg["path"], params):
-        registros.extend(pagina)
-        paginas += 1
+    for req in requisicoes:
+        for pagina in client.paginar(cfg["path"], req):
+            registros.extend(pagina)
+            paginas += 1
 
     caminho = caminho_particao(dominio, particao)
     destino = storage.gravar(para_tabela(registros, {"dominio": dominio, **particao}), caminho)
-    auditoria = {"dominio": dominio, **particao, "paginas": paginas, "linhas": len(registros),
+    auditoria = {"dominio": dominio, **particao, "requisicoes": len(requisicoes),
+                 "paginas": paginas, "linhas": len(registros),
                  "destino": destino, "duracao_s": round(time.monotonic() - inicio, 2)}
     log.info("Carga concluída: %s", auditoria)
     return auditoria

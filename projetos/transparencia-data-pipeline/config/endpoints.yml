@@ -12,3 +12,8 @@ endpoints:
     restrito: true
     particao: mes_ano      # um arquivo por mês (param mesAno=YYYYMM)
     params_fixos: {}
+    # A API exige codigoIbge: uma chamada por município. Com 180 req/min, MG (853
+    # municípios) leva ~6 min por mês; o Brasil inteiro (~5.570), ~35 min.
+    # Sobrescreva com a variável BF_UFS (ex.: "MG,SP").
+    iterar_por: codigoIbge
+    ufs: [MG]

@@ -33,7 +33,8 @@ def test_extracao_grava_payload_bruto_e_e_idempotente(tmp_path):
 
     for _ in range(2):  # reexecução da mesma partição
         auditoria = extrair("bolsa_familia_municipio", 2026, 1,
-                            client=ClienteFalso(paginas), storage=storage)
+                            client=ClienteFalso(paginas), storage=storage,
+                            municipios=["3143302"])
 
     arquivo = tmp_path / "bronze/bolsa_familia_municipio/ano=2026/mes=01/dados.parquet"
     tabela = pq.read_table(arquivo)
@@ -46,3 +47,27 @@ def test_extracao_grava_payload_bruto_e_e_idempotente(tmp_path):
 def test_dominio_inexistente():
     with pytest.raises(KeyError):
         extrair("nao_existe", 2026, 1, client=ClienteFalso([]), storage=object())
+
+
+def test_bolsa_familia_faz_uma_chamada_por_municipio(tmp_path):
+    cliente = ClienteFalso([[{"valor": 1}]])
+    auditoria = extrair("bolsa_familia_municipio", 2024, 1, client=cliente,
+                        storage=Storage("local", raiz=str(tmp_path)),
+                        municipios=["3106200", "3143302"])
+    assert [p["codigoIbge"] for _, p in cliente.chamadas] == ["3106200", "3143302"]
+    assert all(p["mesAno"] == "202401" for _, p in cliente.chamadas)
+    assert auditoria["requisicoes"] == 2 and auditoria["linhas"] == 2
+
+
+def test_endpoint_sem_iteracao_faz_uma_chamada(tmp_path):
+    cliente = ClienteFalso([[{"valor": 1}]])
+    extrair("despesas_por_orgao", 2024, client=cliente, storage=Storage("local", raiz=str(tmp_path)))
+    assert len(cliente.chamadas) == 1 and "codigoIbge" not in cliente.chamadas[0][1]
+
+
+def test_ufs_por_variavel_de_ambiente(monkeypatch):
+    from ingestion.extract import ufs_configuradas
+    monkeypatch.setenv("BF_UFS", "MG, SP")
+    assert [u.strip() for u in ufs_configuradas({"ufs": ["RJ"]})] == ["MG", "SP"]
+    monkeypatch.delenv("BF_UFS")
+    assert ufs_configuradas({"ufs": ["RJ"]}) == ["RJ"]
